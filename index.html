@@ -4,47 +4,72 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>My Perfect Hotel</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #00C565; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+    </style>
     <script>
-        // The core configuration you extracted earlier
         window.config = {
-            loader: 'unity-2020',
-            debug: false,
-            maxRatio: 24 / 9,
-            minRatio: 9 / 24,
-            title: 'My Perfect Hotel',
-            thumbnail: 'thumb.png',
-            numScreenshots:  4,
-            unityVersion: '2022.3.18f1',
-            unityWebglBuildUrl: '',
-            fileSize:  31,
+            loader: 'unity-2020', debug: false, maxRatio: 24 / 9, minRatio: 9 / 24,
+            title: 'My Perfect Hotel', thumbnail: 'thumb.png', numScreenshots: 4,
+            unityVersion: '2022.3.18f1', unityWebglBuildUrl: '', fileSize: 31,
             cachedDecompressedFileSizes: {
-                '952596604e9ece58dd0e915d2baf70c9.js':  410752,
-                'd103a616cc0b6f5c976b00be4279887c.data':  8154858,
-                'dac7134163153fb80c5fa563b488e930.wasm':  23362153,
-                'hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js':  20672,
+                '952596604e9ece58dd0e915d2baf70c9.js': 410752,
+                'd103a616cc0b6f5c976b00be4279887c.data': 8154858,
+                'dac7134163153fb80c5fa563b488e930.wasm': 23362153,
+                'hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js': 20672,
             },
             "metadata": {"poki_template_version":1,"background_color":"#00C565","code_filename":"dac7134163153fb80c5fa563b488e930.wasm","company_name":"master","data_filename":"d103a616cc0b6f5c976b00be4279887c.data","development_player":"false","framework_filename":"952596604e9ece58dd0e915d2baf70c9.js","height":"1920","loader_filename":"hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js","product_name":"My Hotel","product_version":"1.0.3","splash_screen_style":"Dark","unity_version":"2022.3.18f1","use_data_caching":"true","use_threads":"false","use_wasm":"true","use_webgl_1_0":"false","use_webgl_2_0":"true","width":"1080"}
         };
     </script>
 </head>
-<body style="text-align: center; padding: 0; border: 0; margin: 0; background-color: #00C565; overflow: hidden;">
-    
-    <div id="unity-container" class="unity-desktop" style="width: 100%; height: 100%; position: absolute;">
-        <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #00C565;"></canvas>
-        
-        <div id="unity-loading-bar" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none;">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty" style="width: 141px; height: 18px; margin-top: 10px; background: #E0E0E0;">
-                <div id="unity-progress-bar-full" style="width: 0%; height: 100%; background: #ffffff;"></div>
-            </div>
-        </div>
-        <div id="unity-warning"></div>
-        <div id="unity-footer" style="display: none;">
-            <div id="unity-webgl-logo"></div>
-            <div id="unity-fullscreen-button"></div>
-            <div id="unity-build-title">My Perfect Hotel</div>
-        </div>
-    </div>
+<body>
+    <script>
+        const realGetElementById = document.getElementById.bind(document);
+        const realQuerySelector = document.querySelector.bind(document);
+
+        // Intercept ID lookups
+        document.getElementById = function(id) {
+            let el = realGetElementById(id);
+            if (!el) {
+                console.log("[ENI] Wrapper requested missing ID: '" + id + "' - Forging it.");
+                if (id.toLowerCase().includes("canvas")) {
+                    el = document.createElement("canvas");
+                } else {
+                    el = document.createElement("div");
+                    el.style.display = "none"; // Hide their weird UI elements
+                }
+                el.id = id;
+                document.body.appendChild(el);
+            }
+            return el;
+        };
+
+        // Intercept Selector lookups
+        document.querySelector = function(selector) {
+            if (!selector || selector === '#' || selector === ' ') {
+                return document.createElement("div"); // Catch Emscripten garbage
+            }
+            try {
+                let el = realQuerySelector(selector);
+                if (!el) {
+                    console.log("[ENI] Wrapper requested missing selector: '" + selector + "' - Forging it.");
+                    if (selector.toLowerCase().includes("canvas")) {
+                        el = document.createElement("canvas");
+                        document.body.appendChild(el);
+                        return el;
+                    }
+                    let dummy = document.createElement("div");
+                    dummy.style.display = "none";
+                    document.body.appendChild(dummy);
+                    return dummy;
+                }
+                return el;
+            } catch(e) {
+                return document.createElement("div");
+            }
+        };
+    </script>
 
     <script src="my-perfect-hotel.js"></script>
 </body>
