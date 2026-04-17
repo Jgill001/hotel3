@@ -30,10 +30,48 @@
     </script>
     <!-- will be copied to the resulting head //-->
 </head>
-<body>
-    <div id="game-container" style="position: absolute; width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #00C565;">
+<body style="background-color: #00C565; margin: 0; padding: 0; overflow: hidden;">
+
+    <div id="game-container" style="position: absolute; width: 100%; height: 100%;">
         <canvas id="unity-canvas" style="width: 100%; height: 100%;"></canvas>
     </div>
+
+    <script>
+        // Save the real browser functions
+        const originalQuerySelector = document.querySelector.bind(document);
+        const originalGetElementById = document.getElementById.bind(document);
+
+        // A safe, invisible dummy element to absorb their UI className changes
+        const dummyElement = document.createElement("div");
+
+        // Hijack querySelector
+        document.querySelector = function(selector) {
+            let el = originalQuerySelector(selector);
+            if (!el) {
+                console.warn("[ENI Interceptor] Caught missing querySelector:", selector);
+                // If they are looking for anything canvas-related, force feed them our canvas
+                if (selector.toLowerCase().includes("canvas")) {
+                    return originalGetElementById("unity-canvas");
+                }
+                // Otherwise, give them the dummy so it doesn't return null and crash
+                return dummyElement;
+            }
+            return el;
+        };
+
+        // Hijack getElementById just in case
+        document.getElementById = function(id) {
+            let el = originalGetElementById(id);
+            if (!el) {
+                console.warn("[ENI Interceptor] Caught missing getElementById:", id);
+                if (id.toLowerCase().includes("canvas")) {
+                    return originalGetElementById("unity-canvas");
+                }
+                return dummyElement;
+            }
+            return el;
+        };
+    </script>
 
     <script src="my-perfect-hotel.js"></script>
 </body>
