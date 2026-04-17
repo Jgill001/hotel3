@@ -1,91 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>My Perfect Hotel</title>
     <script>
+        // The core configuration you extracted earlier
         window.config = {
             loader: 'unity-2020',
             debug: false,
             maxRatio: 24 / 9,
             minRatio: 9 / 24,
-
             title: 'My Perfect Hotel',
             thumbnail: 'thumb.png',
-            numScreenshots:  4 ,
-
+            numScreenshots:  4,
             unityVersion: '2022.3.18f1',
             unityWebglBuildUrl: '',
-
-            fileSize:  31 ,
+            fileSize:  31,
             cachedDecompressedFileSizes: {
-                '952596604e9ece58dd0e915d2baf70c9.js':  410752 ,
-                'd103a616cc0b6f5c976b00be4279887c.data':  8154858 ,
-                'dac7134163153fb80c5fa563b488e930.wasm':  23362153 ,
-                'hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js':  20672 ,
+                '952596604e9ece58dd0e915d2baf70c9.js':  410752,
+                'd103a616cc0b6f5c976b00be4279887c.data':  8154858,
+                'dac7134163153fb80c5fa563b488e930.wasm':  23362153,
+                'hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js':  20672,
             },
             "metadata": {"poki_template_version":1,"background_color":"#00C565","code_filename":"dac7134163153fb80c5fa563b488e930.wasm","company_name":"master","data_filename":"d103a616cc0b6f5c976b00be4279887c.data","development_player":"false","framework_filename":"952596604e9ece58dd0e915d2baf70c9.js","height":"1920","loader_filename":"hotel-master-v2022.3.18f1-store-v1_0_3-build430.loader.js","product_name":"My Hotel","product_version":"1.0.3","splash_screen_style":"Dark","unity_version":"2022.3.18f1","use_data_caching":"true","use_threads":"false","use_wasm":"true","use_webgl_1_0":"false","use_webgl_2_0":"true","width":"1080"}
         };
     </script>
-    <!-- will be copied to the resulting head //-->
 </head>
-<body style="background-color: #00C565; margin: 0; padding: 0; overflow: hidden;">
-
-    <div id="game-container" style="position: absolute; width: 100%; height: 100%;">
-        <canvas id="unity-canvas" style="width: 100%; height: 100%;"></canvas>
+<body style="text-align: center; padding: 0; border: 0; margin: 0; background-color: #00C565; overflow: hidden;">
+    
+    <div id="unity-container" class="unity-desktop" style="width: 100%; height: 100%; position: absolute;">
+        <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #00C565;"></canvas>
+        
+        <div id="unity-loading-bar" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none;">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty" style="width: 141px; height: 18px; margin-top: 10px; background: #E0E0E0;">
+                <div id="unity-progress-bar-full" style="width: 0%; height: 100%; background: #ffffff;"></div>
+            </div>
+        </div>
+        <div id="unity-warning"></div>
+        <div id="unity-footer" style="display: none;">
+            <div id="unity-webgl-logo"></div>
+            <div id="unity-fullscreen-button"></div>
+            <div id="unity-build-title">My Perfect Hotel</div>
+        </div>
     </div>
 
-    <script>
-         <script>
-        const originalQuerySelector = document.querySelector.bind(document);
-        const originalGetElementById = document.getElementById.bind(document);
-
-        const dummyElement = document.createElement("div");
-
-        document.querySelector = function(selector) {
-            // Emscripten bug: catching the broken "#" or empty selectors before they crash the browser
-            if (!selector || selector === '#' || selector === ' ') {
-                console.warn("[ENI Interceptor] Caught malformed Emscripten selector:", selector);
-                return originalGetElementById("unity-canvas");
-            }
-
-            try {
-                let el = originalQuerySelector(selector);
-                if (!el) {
-                    console.warn("[ENI Interceptor] Caught missing querySelector:", selector);
-                    if (selector.toLowerCase().includes("canvas")) {
-                        return originalGetElementById("unity-canvas");
-                    }
-                    return dummyElement;
-                }
-                return el;
-            } catch (error) {
-                // If it's a completely invalid selector string that throws a SyntaxError, catch it and feed it the canvas
-                console.warn("[ENI Interceptor] Caught SyntaxError on selector:", selector, error);
-                return originalGetElementById("unity-canvas");
-            }
-        };
-
-        document.getElementById = function(id) {
-            if (!id || id === '#' || id === ' ') {
-                return originalGetElementById("unity-canvas");
-            }
-            try {
-                let el = originalGetElementById(id);
-                if (!el) {
-                    console.warn("[ENI Interceptor] Caught missing getElementById:", id);
-                    if (id.toLowerCase().includes("canvas")) {
-                        return originalGetElementById("unity-canvas");
-                    }
-                    return dummyElement;
-                }
-                return el;
-            } catch (error) {
-                return originalGetElementById("unity-canvas");
-            }
-        };
-    </script>
     <script src="my-perfect-hotel.js"></script>
 </body>
 </html>
