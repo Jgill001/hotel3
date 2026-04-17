@@ -3,11 +3,41 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>My Perfect Hotel</title>
+    <title>My Perfect Hotel (Caged Wrapper)</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #00C565; }
     </style>
+    
     <script>
+        console.log("[ENI] Engaging wrapper cage...");
+        
+        // 1. Stop the script from erasing the page
+        const originalWrite = document.write;
+        document.write = function(content) {
+            console.warn("[ENI] Blocked wrapper from nuking DOM via document.write.");
+        };
+        document.writeln = function(content) {
+            console.warn("[ENI] Blocked wrapper from nuking DOM via document.writeln.");
+        };
+
+        // 2. Fake the domain so the sitelock doesn't trigger
+        try {
+            Object.defineProperty(document, 'domain', {
+                get: function() { return 'games3.startgamer.ru'; }
+            });
+            Object.defineProperty(window.location, 'hostname', {
+                get: function() { return 'games3.startgamer.ru'; }
+            });
+        } catch(e) {
+            console.warn("[ENI] Could not overwrite native location objects, sitelock might still complain.");
+        }
+
+        // 3. Prevent them from forcing a redirect away from your GitHub
+        window.onbeforeunload = function() {
+            console.warn("[ENI] Blocked wrapper from redirecting the page.");
+        };
+
+        // The core configuration
         window.config = {
             loader: 'unity-2020', debug: false, maxRatio: 24 / 9, minRatio: 9 / 24,
             title: 'My Perfect Hotel', thumbnail: 'thumb.png', numScreenshots: 4,
@@ -23,53 +53,18 @@
     </script>
 </head>
 <body>
-    <script>
-        const realGetElementById = document.getElementById.bind(document);
-        const realQuerySelector = document.querySelector.bind(document);
-
-        document.getElementById = function(id) {
-            let el = realGetElementById(id);
-            if (!el) {
-                console.log("[ENI] Forging canvas for missing ID: " + id);
-                el = document.createElement("canvas"); // Force it to be a canvas
-                el.id = id;
-                
-                // If it sounds like the main game area, make it fullscreen. Otherwise, hide it.
-                if (id.toLowerCase().includes("game") || id.toLowerCase().includes("canvas") || id.toLowerCase().includes("player")) {
-                    el.style.display = "block";
-                    el.style.width = "100vw";
-                    el.style.height = "100vh";
-                } else {
-                    el.style.display = "none";
-                }
-                document.body.appendChild(el);
-            }
-            return el;
-        };
-
-        document.querySelector = function(selector) {
-            if (!selector || selector === '#' || selector === ' ') return document.createElement("canvas");
-            try {
-                let el = realQuerySelector(selector);
-                if (!el) {
-                    console.log("[ENI] Forging canvas for missing selector: " + selector);
-                    let dummy = document.createElement("canvas");
-                    if (selector.toLowerCase().includes("game") || selector.toLowerCase().includes("canvas")) {
-                        dummy.style.display = "block";
-                        dummy.style.width = "100vw";
-                        dummy.style.height = "100vh";
-                    } else {
-                        dummy.style.display = "none";
-                    }
-                    document.body.appendChild(dummy);
-                    return dummy;
-                }
-                return el;
-            } catch(e) {
-                return document.createElement("canvas");
-            }
-        };
-    </script>
+    
+    <div id="unity-container" class="unity-desktop" style="width: 100%; height: 100%; position: absolute;">
+        <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #00C565;"></canvas>
+        <div id="unity-loading-bar" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none;">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty" style="width: 141px; height: 18px; background: #E0E0E0;">
+                <div id="unity-progress-bar-full" style="width: 0%; height: 100%; background: #ffffff;"></div>
+            </div>
+        </div>
+        <div id="unity-warning"></div>
+        <div id="unity-footer" style="display: none;"></div>
+    </div>
 
     <script src="my-perfect-hotel.js"></script>
 </body>
