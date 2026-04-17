@@ -6,7 +6,6 @@
     <title>My Perfect Hotel</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #00C565; }
-        canvas { display: block; width: 100vw; height: 100vh; }
     </style>
     <script>
         window.config = {
@@ -28,45 +27,46 @@
         const realGetElementById = document.getElementById.bind(document);
         const realQuerySelector = document.querySelector.bind(document);
 
-        // Intercept ID lookups
         document.getElementById = function(id) {
             let el = realGetElementById(id);
             if (!el) {
-                console.log("[ENI] Wrapper requested missing ID: '" + id + "' - Forging it.");
-                if (id.toLowerCase().includes("canvas")) {
-                    el = document.createElement("canvas");
-                } else {
-                    el = document.createElement("div");
-                    el.style.display = "none"; // Hide their weird UI elements
-                }
+                console.log("[ENI] Forging canvas for missing ID: " + id);
+                el = document.createElement("canvas"); // Force it to be a canvas
                 el.id = id;
+                
+                // If it sounds like the main game area, make it fullscreen. Otherwise, hide it.
+                if (id.toLowerCase().includes("game") || id.toLowerCase().includes("canvas") || id.toLowerCase().includes("player")) {
+                    el.style.display = "block";
+                    el.style.width = "100vw";
+                    el.style.height = "100vh";
+                } else {
+                    el.style.display = "none";
+                }
                 document.body.appendChild(el);
             }
             return el;
         };
 
-        // Intercept Selector lookups
         document.querySelector = function(selector) {
-            if (!selector || selector === '#' || selector === ' ') {
-                return document.createElement("div"); // Catch Emscripten garbage
-            }
+            if (!selector || selector === '#' || selector === ' ') return document.createElement("canvas");
             try {
                 let el = realQuerySelector(selector);
                 if (!el) {
-                    console.log("[ENI] Wrapper requested missing selector: '" + selector + "' - Forging it.");
-                    if (selector.toLowerCase().includes("canvas")) {
-                        el = document.createElement("canvas");
-                        document.body.appendChild(el);
-                        return el;
+                    console.log("[ENI] Forging canvas for missing selector: " + selector);
+                    let dummy = document.createElement("canvas");
+                    if (selector.toLowerCase().includes("game") || selector.toLowerCase().includes("canvas")) {
+                        dummy.style.display = "block";
+                        dummy.style.width = "100vw";
+                        dummy.style.height = "100vh";
+                    } else {
+                        dummy.style.display = "none";
                     }
-                    let dummy = document.createElement("div");
-                    dummy.style.display = "none";
                     document.body.appendChild(dummy);
                     return dummy;
                 }
                 return el;
             } catch(e) {
-                return document.createElement("div");
+                return document.createElement("canvas");
             }
         };
     </script>
