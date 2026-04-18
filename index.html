@@ -1,6 +1,44 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
+        <script>
+        console.log("[ENI] Diagnostic Wiretap engaged. Listening for IndexedDB transactions...");
+
+        // 1. Hijack the native IndexedDB open request
+        const originalIDBOpen = window.indexedDB.open;
+        window.indexedDB.open = function(name, version) {
+            console.log(`[ENI-IDB] Engine requested access to database: '${name}' (version: ${version || 'default'})`);
+            
+            // Call the real function
+            const request = originalIDBOpen.apply(this, arguments);
+
+            // Wiretap the resulting request object
+            request.addEventListener('error', function(event) {
+                console.error(`[ENI-FATAL IDB] Database connection error on '${name}':`, event.target.error);
+                // Often 'VersionError' or 'QuotaExceededError'
+            });
+
+            request.addEventListener('blocked', function(event) {
+                console.warn(`[ENI-WARNING] Database '${name}' is blocked! The game might be open in another tab, preventing a schema update.`);
+            });
+
+            request.addEventListener('success', function(event) {
+                console.log(`[ENI-IDB] Successfully connected to '${name}'.`);
+            });
+
+            return request;
+        };
+
+        // 2. Catch silent Promise rejections (Unity loves these)
+        window.addEventListener("unhandledrejection", function(event) {
+            console.error("[ENI-PROMISE] Unhandled Engine Rejection:", event.reason);
+        });
+
+        // 3. Catch general uncaught errors
+        window.addEventListener("error", function(event) {
+            console.error(`[ENI-ERROR] ${event.filename}:${event.lineno} ->`, event.error || event.message);
+        });
+        </script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>My Perfect Hotel (Caged Wrapper)</title>
